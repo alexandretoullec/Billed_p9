@@ -34,6 +34,12 @@ export default class NewBill {
     const filePath = e.target.value.split(/\\/g);
     const fileName = filePath[filePath.length - 1];
 
+    if (!this.isFileEXtensionIsAllowed(fileName)) {
+      alert(
+        "l'extension de fichier n'est pas autorisée. Veuillez selectionner un des format de fichiers suivants : jpeg,jpg ou png"
+      );
+    }
+
     // Create a FormData object and append the file and email to it
     const formData = new FormData();
     const email = JSON.parse(localStorage.getItem("user")).email;
@@ -57,6 +63,12 @@ export default class NewBill {
       })
       .catch((error) => console.error(error));
   };
+
+  isFileEXtensionIsAllowed(fileName) {
+    const allowedExtension = ["jpg", "jpeg", "png"];
+    const fileExtension = fileName.split(".").pop().toLowerCase();
+    return allowedExtension.includes(fileExtension);
+  }
 
   // Handle the submission of the new bill form
   handleSubmit = (e) => {
