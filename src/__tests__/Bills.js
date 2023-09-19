@@ -3,15 +3,17 @@
  */
 
 import "@testing-library/jest-dom";
-import { screen, waitFor } from "@testing-library/dom";
+import { fireEvent, screen, waitFor } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
-import Bills from "../containers/Bills.js";
 import BillsUI from "../views/BillsUI.js";
-import { bills } from "../fixtures/bills.js";
+import Bills from "../containers/Bills.js";
 import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
 import mockStore from "../__mocks__/store";
+import { bills } from "../fixtures/bills.js";
 import router from "../app/Router.js";
+
+import { formatDate, formatStatus } from "../app/format"; // Import formatDate and formatStatus functions
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
@@ -84,7 +86,7 @@ describe("Given I am connected as an employee", () => {
     });
   });
 
-  describe("when I click on th icon eye", () => {
+  describe("when I click on the icon eye", () => {
     test("it should render a modal", () => {
       //define a function to simulate navigation by changing the page content
       const onNavigate = (pathName) => {
@@ -128,23 +130,79 @@ describe("Given I am connected as an employee", () => {
   });
 });
 
+describe("Bills Class - getBills method", () => {
+  let billsInstance;
+
+  // Mock the store with a simple implementation
+  const mockStore = {
+    bills: () => ({
+      list: () => Promise.resolve(bills), // Mocking list() to return sample bills data
+    }),
+  };
+
+  beforeEach(() => {
+    billsInstance = new Bills({
+      document: document,
+      onNavigate: jest.fn(),
+      store: mockStore,
+      localStorage: window.localStorage,
+    });
+  });
+
+  test("should format bills and return them", async () => {
+    // Call the getBills method
+    const formattedBills = await billsInstance.getBills();
+
+    // Check if the bills are formatted correctly
+    expect(formattedBills).toEqual(
+      bills.map((bill) => ({
+        ...bill,
+        date: formatDate(bill.date),
+        status: formatStatus(bill.status),
+      }))
+    );
+  });
+});
+
 // Test d'intégration GET
-describe("Given when I am a user connected as Admin", () => {
+
+describe("Given I am a user connected as Admin", () => {
   describe("When I navigate to Bills", () => {
-    test("Then fetches bills from mock API GET", async () => {
+    // Test case 1: Fetches bills from mock API GET
+    test("fetches bills from mock API GET", async () => {
+      // Set user type and email in localStorage
       localStorage.setItem(
         "user",
         JSON.stringify({ type: "Admin", email: "a@a" })
       );
+
+      // // Create a root element and append it to the document body
+      // const root = document.createElement("div");
+      // root.setAttribute("id", "root");
+      // document.body.append(root);
+
+      // // Call the router function to navigate to the Bills
+      // router();
+      // window.onNavigate(ROUTES_PATH.Bills);
+
+      // Create a root element and append it to the document body
       new Bills({
         document,
         onNavigate,
-        mockStore,
         localStorage: window.localStorage,
       });
+
       document.body.innerHTML = BillsUI({ data: bills });
+
+      // Wait for the "Mes notes de frais" text to be present on screen
       await waitFor(() => screen.getByText("Mes notes de frais"));
-      expect(screen.getByText("Mes notes de frais")).toBeTruthy();
+
+      //check for the "Mes notes de frais" to be shown on screen
+      expect(screen.getByText("Mes notes de frais")).toBeTruthy;
+
+      //check if content for "En attente" is present
+      const contentEnAttente = await screen.getByText("Actions");
+      expect(contentEnAttente).toBeTruthy();
     });
   });
 
@@ -163,6 +221,7 @@ describe("Given when I am a user connected as Admin", () => {
       );
     });
     test("should fetch and fail with 404 message error", async () => {
+      // Mock the store's "list" method to return a rejected Promise with an error message
       mockStore.bills.mockImplementationOnce(() => {
         return {
           list: () => {
@@ -170,24 +229,88 @@ describe("Given when I am a user connected as Admin", () => {
           },
         };
       });
+
       const html = BillsUI({ error: "Erreur 404" });
       document.body.innerHTML = html;
       const message = await screen.getByText(/Erreur 404/);
       expect(message).toBeTruthy();
     });
+  });
 
-    test("should fetch and fail with 500 message error", async () => {
-      mockStore.bills.mockImplementationOnce(() => {
-        return {
-          list: () => {
-            return Promise.reject(new Error("Erreur 500"));
-          },
-        };
-      });
-      const html = BillsUI({ error: "Erreur 500" });
-      document.body.innerHTML = html;
-      const message = await screen.getByText(/Erreur 500/);
-      expect(message).toBeTruthy();
+  test("should fetch and fail with 500 message error", async () => {
+    mockStore.bills.mockImplementationOnce(() => {
+      return {
+        list: () => {
+          return Promise.reject(new Error("Erreur 500"));
+        },
+      };
     });
+    const html = BillsUI({ error: "Erreur 500" });
+    document.body.innerHTML = html;
+    const message = await screen.getByText(/Erreur 500/);
+    expect(message).toBeTruthy();
   });
 });
+
+// describe("Given when I am a user connected as Admin", () => {
+//   describe("When I navigate to Bills", () => {
+//     test("Then fetches bills from mock API GET", async () => {
+//       localStorage.setItem(
+//         "user",
+//         JSON.stringify({ type: "Admin", email: "a@a" })
+//       );
+//       new Bills({
+//         document,
+//         onNavigate,
+//         mockStore,
+//         localStorage: window.localStorage,
+//       });
+//       document.body.innerHTML = BillsUI({ data: bills });
+//       await waitFor(() => screen.getByText("Mes notes de frais"));
+//       expect(screen.getByText("Mes notes de frais")).toBeTruthy();
+//     });
+//   });
+
+//   describe("When an error occurs on API", () => {
+//     beforeEach(() => {
+//       jest.spyOn(mockStore, "bills");
+//       Object.defineProperty(window, "localStorage", {
+//         value: localStorageMock,
+//       });
+//       window.localStorage.setItem(
+//         "user",
+//         JSON.stringify({
+//           type: "Admin",
+//           email: "a@a",
+//         })
+//       );
+//     });
+//     test("should fetch and fail with 404 message error", async () => {
+//       mockStore.bills.mockImplementationOnce(() => {
+//         return {
+//           list: () => {
+//             return Promise.reject(new Error("Erreur 404"));
+//           },
+//         };
+//       });
+//       const html = BillsUI({ error: "Erreur 404" });
+//       document.body.innerHTML = html;
+//       const message = await screen.getByText(/Erreur 404/);
+//       expect(message).toBeTruthy();
+//     });
+
+// test("should fetch and fail with 500 message error", async () => {
+//   mockStore.bills.mockImplementationOnce(() => {
+//     return {
+//       list: () => {
+//         return Promise.reject(new Error("Erreur 500"));
+//       },
+//     };
+//   });
+//   const html = BillsUI({ error: "Erreur 500" });
+//   document.body.innerHTML = html;
+//   const message = await screen.getByText(/Erreur 500/);
+//   expect(message).toBeTruthy();
+// });
+//   });
+// });
