@@ -176,16 +176,7 @@ describe("Given I am a user connected as Admin", () => {
         JSON.stringify({ type: "Admin", email: "a@a" })
       );
 
-      // // Create a root element and append it to the document body
-      // const root = document.createElement("div");
-      // root.setAttribute("id", "root");
-      // document.body.append(root);
-
-      // // Call the router function to navigate to the Bills
-      // router();
-      // window.onNavigate(ROUTES_PATH.Bills);
-
-      // Create a root element and append it to the document body
+      // Create Bills instance
       new Bills({
         document,
         onNavigate,
@@ -200,7 +191,7 @@ describe("Given I am a user connected as Admin", () => {
       //check for the "Mes notes de frais" to be shown on screen
       expect(screen.getByText("Mes notes de frais")).toBeTruthy;
 
-      //check if content for "En attente" is present
+      //check if content for "Actions" is present
       const contentEnAttente = await screen.getByText("Actions");
       expect(contentEnAttente).toBeTruthy();
     });
