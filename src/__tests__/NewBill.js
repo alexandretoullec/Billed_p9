@@ -54,19 +54,29 @@ describe("Given I am connected as an employee", () => {
       const html = NewBillUI();
       document.body.innerHTML = html;
       const file = screen.getByTestId("file");
+
+      // Create a new instance of NewBill with necessary parameters
       const newBill = new NewBill({
         document,
         onNavigate,
         store: Store,
         localStorage: window.localStorage,
       });
+
+      // Define a function to handle the file change event
       const handleChangeFile = jest.fn(newBill.handleChangeFile);
+
+      // Add an event listener to the file input to handle file changes
       file.addEventListener("change", handleChangeFile);
+
+      // Simulate selecting an incorrect file type (PDF)
       fireEvent.change(file, {
         target: {
           files: [new File(["image"], "test.pdf", { type: "image/pdf" })],
         },
       });
+
+      // Expect that the file input's value is an empty string, indicating failure
       expect(file.value).toBe("");
     });
   });
@@ -100,67 +110,109 @@ describe("Given I am connected as an employee", () => {
       // Expect that the handleSubmit function has been called
       expect(handleSubmit).toHaveBeenCalled();
     });
-    test("then it should create a new bill sucessfully", async () => {
+    test("then verify the submit file", async () => {
       // Mock the bills store and its create method
+      const html = NewBillUI();
+      document.body.innerHTML = html;
+      // Create an instance of the NewBill class with necessary parameters
+      const newBill = new NewBill({
+        document,
+        onNavigate,
+        store: mockStore,
+        localStorage: window.localStorage,
+      });
+      // Create a mock file to upload
+      const file = new File(["image"], "image.png", { type: "image/png" });
+
+      // Define a function to handle the file change event
+      const handleChangeFile = jest.fn((e) => newBill.handleChangeFile(e));
+
+      // Get the form and file input elements
+      const formNewBill = screen.getByTestId("form-new-bill");
+      const billFile = screen.getByTestId("file");
+
+      // Add an event listener to the file input to handle file changes
+      billFile.addEventListener("change", handleChangeFile);
+
+      // Simulate uploading the mock file
+      userEvent.upload(billFile, file);
+
+      // Expect that the file input's value has been defined
+      expect(billFile.files[0].name).toBeDefined();
+
+      // Expect that the handleChangeFile function has been called
+      expect(handleChangeFile).toBeCalled();
+
+      // Define a function to handle the form submission event
+      const handleSubmit = jest.fn((e) => newBill.handleSubmit(e));
+
+      // Add an event listener to the form to handle form submissions
+      formNewBill.addEventListener("submit", handleSubmit);
+
+      // Simulate submitting the form
+      fireEvent.submit(formNewBill);
+
+      // Expect that the handleSubmit function has been called
+      expect(handleSubmit).toHaveBeenCalled();
     });
-    describe("When an error occurs", () => {
-      beforeEach(() => {
-        // Spy on the mockStore's 'bills' method
-        jest.spyOn(mockStore, "bills");
+  });
+  describe("When an error occurs", () => {
+    beforeEach(() => {
+      // Spy on the mockStore's 'bills' method
+      jest.spyOn(mockStore, "bills");
 
-        // Set up localStorage with a user of type 'employee'
-        Object.defineProperty(window, "localeStorage", {
-          value: localStorageMock,
-        });
-        window.localStorage.setItem(
-          "user",
-          JSON.stringify({
-            type: "employee",
-            email: "a@a",
-          })
-        );
+      // Set up localStorage with a user of type 'employee'
+      Object.defineProperty(window, "localeStorage", {
+        value: localStorageMock,
       });
-      test("Then should fail with meassge error 404", async () => {
-        // Mock the 'create' method of 'bills' to reject with an error message
-        mockStore.bills.mockImplementationOnce(() => {
-          return {
-            create: () => {
-              return Promise.reject(new Error("Erreur 404"));
-            },
-          };
-        });
-        // Create an HTML representation of the bills UI with the error message
-
-        const html = BillsUI({ error: "Erreur 404" });
-
-        // Set the document body's HTML to the HTML representation
-        document.body.innerHTML = html;
-        const message = await screen.getByText(/Erreur 404/);
-        expect(message).toBeTruthy();
+      window.localStorage.setItem(
+        "user",
+        JSON.stringify({
+          type: "employee",
+          email: "a@a",
+        })
+      );
+    });
+    test("Then should fail with message error 404", async () => {
+      // Mock the 'create' method of 'bills' to reject with an error message
+      mockStore.bills.mockImplementationOnce(() => {
+        return {
+          create: () => {
+            return Promise.reject(new Error("Erreur 404"));
+          },
+        };
       });
-      test("Then should fail with message error 500", async () => {
-        // Mock the 'create' method of 'bills' to reject with an error message
-        mockStore.bills.mockImplementationOnce(() => {
-          return {
-            create: () => {
-              return Promise.reject(new Error("Erreur 500"));
-            },
-          };
-        });
+      // Create an HTML representation of the bills UI with the error message
 
-        // Create an HTML representation of the bills UI with the error message
+      const html = BillsUI({ error: "Erreur 404" });
 
-        const html = BillsUI({ error: "Erreur 500" });
-
-        // Set the document body's HTML to the HTML representation
-        document.body.innerHTML = html;
-
-        // Find the error message in the rendered HTML
-        const message = await screen.getByText(/Erreur 500/);
-
-        // Expect that the error message is found in the DOM
-        expect(message).toBeTruthy();
+      // Set the document body's HTML to the HTML representation
+      document.body.innerHTML = html;
+      const message = await screen.getByText(/Erreur 404/);
+      expect(message).toBeTruthy();
+    });
+    test("Then should fail with message error 500", async () => {
+      // Mock the 'create' method of 'bills' to reject with an error message
+      mockStore.bills.mockImplementationOnce(() => {
+        return {
+          create: () => {
+            return Promise.reject(new Error("Erreur 500"));
+          },
+        };
       });
+
+      // Create an HTML representation of the bills UI with the error message
+
+      const html = BillsUI({ error: "Erreur 500" });
+
+      // Set the document body's HTML to the HTML representation
+      document.body.innerHTML = html;
+
+      // Find the error message in the rendered HTML
+      const message = await screen.getByText(/Erreur 500/);
+
+      // Expect that the error message is found in the DOM
+      expect(message).toBeTruthy();
     });
   });
 });
