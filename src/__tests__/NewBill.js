@@ -81,7 +81,7 @@ describe("Given I am connected as an employee", () => {
     });
   });
 
-  // test d'intégration post
+  // test d'intégration POST
 
   describe("When I submit a new Bill on a correct form", () => {
     test("Then the submit should success", () => {
@@ -156,7 +156,7 @@ describe("Given I am connected as an employee", () => {
       expect(handleSubmit).toHaveBeenCalled();
     });
   });
-  describe("When an error occurs", () => {
+  describe("When an error occurs on API", () => {
     beforeEach(() => {
       // Spy on the mockStore's 'bills' method
       jest.spyOn(mockStore, "bills");
