@@ -29,6 +29,7 @@ export default class NewBill {
   handleChangeFile = (e) => {
     // Get the selected file and its name
     e.preventDefault();
+    const fileInput = this.document.querySelector(`input[data-testid="file"]`);
     const file = this.document.querySelector(`input[data-testid="file"]`)
       .files[0];
     const filePath = e.target.value.split(/\\/g);
@@ -38,6 +39,7 @@ export default class NewBill {
       alert(
         "l'extension de fichier n'est pas autorisée. Veuillez selectionner un des format de fichiers suivants : jpeg,jpg ou png"
       );
+      fileInput.value = "";
     }
 
     // Create a FormData object and append the file and email to it

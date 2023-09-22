@@ -52,7 +52,7 @@ describe("Given I am connected as an employee", () => {
   });
 
   describe('When I click on "Nouvelle note de frais', () => {
-    test("The it should render the new bill creation form", () => {
+    test("Then it should render the new bill creation form", () => {
       //define a function to simulate navigation by changing the page content
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname });
