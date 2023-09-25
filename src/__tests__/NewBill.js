@@ -57,7 +57,6 @@ describe("Given I am connected as an employee", () => {
   });
 
   // test d'intégration POST
-
   describe("When I upload an incorrect file", () => {
     test("Then the upload fail", () => {
       const html = NewBillUI();

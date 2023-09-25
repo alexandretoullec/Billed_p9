@@ -40,30 +40,29 @@ export default class NewBill {
         "l'extension de fichier n'est pas autorisée. Veuillez selectionner un des format de fichiers suivants : jpeg,jpg ou png"
       );
       fileInput.value = "";
-    } else {
-      // Create a FormData object and append the file and email to it
-      const formData = new FormData();
-      const email = JSON.parse(localStorage.getItem("user")).email;
-      formData.append("file", file);
-      formData.append("email", email);
-
-      // Create a new bill using the store
-      this.store
-        .bills()
-        .create({
-          data: formData,
-          headers: {
-            noContentType: true,
-          },
-        })
-        .then(({ fileUrl, key }) => {
-          console.log(fileUrl);
-          this.billId = key;
-          this.fileUrl = fileUrl;
-          this.fileName = fileName;
-        })
-        .catch((error) => console.error(error));
     }
+    // Create a FormData object and append the file and email to it
+    const formData = new FormData();
+    const email = JSON.parse(localStorage.getItem("user")).email;
+    formData.append("file", file);
+    formData.append("email", email);
+
+    // Create a new bill using the store
+    this.store
+      .bills()
+      .create({
+        data: formData,
+        headers: {
+          noContentType: true,
+        },
+      })
+      .then(({ fileUrl, key }) => {
+        console.log(fileUrl);
+        this.billId = key;
+        this.fileUrl = fileUrl;
+        this.fileName = fileName;
+      })
+      .catch((error) => console.error(error));
   };
 
   isFileEXtensionIsAllowed(fileName) {
