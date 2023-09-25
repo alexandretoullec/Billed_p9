@@ -38,6 +38,41 @@ describe("Given I am connected as an employee", () => {
       // expect than windowsIcon have the style background blue
       expect(windowIcon.className).toBe("active-icon");
     });
+  });
+
+  describe("When Bills appears on screen", () => {
+    let billsInstance;
+
+    // Mock the store with a simple implementation
+    const mockStore = {
+      bills: () => ({
+        list: () => Promise.resolve(bills), // Mocking list() to return sample bills data
+      }),
+    };
+
+    beforeEach(() => {
+      billsInstance = new Bills({
+        document: document,
+        onNavigate: jest.fn(),
+        store: mockStore,
+        localStorage: window.localStorage,
+      });
+    });
+
+    test("Then it should format bills and return them", async () => {
+      // Call the getBills method
+      const formattedBills = await billsInstance.getBills();
+
+      // Check if the bills are formatted correctly
+      expect(formattedBills).toEqual(
+        bills.map((bill) => ({
+          ...bill,
+          date: formatDate(bill.date),
+          status: formatStatus(bill.status),
+        }))
+      );
+    });
+
     test("Then bills should be ordered from earliest to latest", () => {
       document.body.innerHTML = BillsUI({ data: bills });
       const dates = screen
@@ -127,40 +162,6 @@ describe("Given I am connected as an employee", () => {
       // Check if the modal element has the "show" class, indicating it is displayed
       expect(modaleFile).toHaveClass("show");
     });
-  });
-});
-
-describe("When Bills appears on screen", () => {
-  let billsInstance;
-
-  // Mock the store with a simple implementation
-  const mockStore = {
-    bills: () => ({
-      list: () => Promise.resolve(bills), // Mocking list() to return sample bills data
-    }),
-  };
-
-  beforeEach(() => {
-    billsInstance = new Bills({
-      document: document,
-      onNavigate: jest.fn(),
-      store: mockStore,
-      localStorage: window.localStorage,
-    });
-  });
-
-  test("Then it should format bills and return them", async () => {
-    // Call the getBills method
-    const formattedBills = await billsInstance.getBills();
-
-    // Check if the bills are formatted correctly
-    expect(formattedBills).toEqual(
-      bills.map((bill) => ({
-        ...bill,
-        date: formatDate(bill.date),
-        status: formatStatus(bill.status),
-      }))
-    );
   });
 });
 
