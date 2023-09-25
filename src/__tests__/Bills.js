@@ -213,12 +213,11 @@ describe("Given I am a user connected as Admin", () => {
         value: localStorageMock,
       });
 
-      // Set up localStorage with an admin user
+      // Set up localStorage with an employee user
       window.localStorage.setItem(
         "user",
         JSON.stringify({
-          type: "Admin",
-          email: "a@a",
+          type: "Employee",
         })
       );
     });
@@ -247,7 +246,7 @@ describe("Given I am a user connected as Admin", () => {
   // Test case 2: Error with status code 500
   test("should fetch and fail with 500 message error", async () => {
     mockStore.bills.mockImplementationOnce(() => {
-      // Mock the store's "list" method to return a rejected Promise with an error message
+      // Mock the store's "list" method to return a rejected Promise with the 500 error message
       return {
         list: () => {
           return Promise.reject(new Error("Erreur 500"));
