@@ -38,6 +38,12 @@ describe("Given I am connected as an employee", () => {
     window.onNavigate(ROUTES_PATH.NewBill);
   });
   describe("When I am on NewBill Page", () => {
+    //are we on new bill page?
+    test("Then new Bill page should be displayed", async () => {
+      await waitFor(() => screen.getByText("Envoyer une note de frais"));
+      expect(screen.getByText("Envoyer une note de frais")).toBeTruthy();
+      expect(screen.getByTestId("file")).toBeTruthy();
+    });
     test("Then email icon in vertical layout should be highlighted", async () => {
       // Wait for the "icon-mail" to be present on the screen
       await waitFor(() => screen.getByTestId("icon-mail"));
@@ -49,6 +55,9 @@ describe("Given I am connected as an employee", () => {
       expect(windowIcon.className).toBe("active-icon");
     });
   });
+
+  // test d'intégration POST
+
   describe("When I upload an incorrect file", () => {
     test("Then the upload fail", () => {
       const html = NewBillUI();
@@ -80,8 +89,6 @@ describe("Given I am connected as an employee", () => {
       expect(file.value).toBe("");
     });
   });
-
-  // test d'intégration POST
 
   describe("When I submit a new Bill on a correct form", () => {
     test("Then the submit should success", () => {
