@@ -130,7 +130,7 @@ describe("Given I am connected as an employee", () => {
   });
 });
 
-describe("Bills Class - getBills method", () => {
+describe("When Bills appears on screen", () => {
   let billsInstance;
 
   // Mock the store with a simple implementation
@@ -149,7 +149,7 @@ describe("Bills Class - getBills method", () => {
     });
   });
 
-  test("should format bills and return them", async () => {
+  test("Then it should format bills and return them", async () => {
     // Call the getBills method
     const formattedBills = await billsInstance.getBills();
 
