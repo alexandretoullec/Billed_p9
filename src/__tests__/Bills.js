@@ -171,30 +171,37 @@ describe("Given I am a user connected as Admin", () => {
   describe("When I navigate to Bills", () => {
     // Test case 1: Fetches bills from mock API GET
     test("fetches bills from mock API GET", async () => {
-      // Set user type and email in localStorage
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ type: "Admin", email: "a@a" })
-      );
-
-      // Create Bills instance
-      new Bills({
-        document,
-        onNavigate,
-        localStorage: window.localStorage,
-      });
-
-      document.body.innerHTML = BillsUI({ data: bills });
-
-      // Wait for the "Mes notes de frais" text to be present on screen
+      localStorage.setItem("user", JSON.stringify({ type: "Employee" }));
+      const root = document.createElement("div");
+      root.setAttribute("id", "root");
+      document.body.append(root);
+      router();
+      window.onNavigate(ROUTES_PATH.Bills);
       await waitFor(() => screen.getByText("Mes notes de frais"));
-
-      //check for the "Mes notes de frais" to be shown on screen
-      expect(screen.getByText("Mes notes de frais")).toBeTruthy;
-
-      //check if content for "Actions" is present
-      const contentEnAttente = await screen.getByText("Actions");
-      expect(contentEnAttente).toBeTruthy();
+      //the 4 bills are there ?
+      const content1 = screen.getByText("encore");
+      expect(content1).toBeDefined();
+      const content2 = screen.getByText("test1");
+      expect(content2).toBeDefined();
+      const content3 = screen.getByText("test3");
+      expect(content3).toBeTruthy();
+      const content4 = screen.getByText("test2");
+      expect(content4).toBeDefined();
+      //number check
+      expect(screen.getAllByTestId("icon-eye").length).toEqual(4);
+      //modal for the attachment file to th bill
+      expect(screen.getByText("Justificatif")).toBeVisible();
+      //new Bill button
+      expect(screen.getByTestId("btn-new-bill")).toHaveTextContent(
+        "Nouvelle note de frais"
+      );
+      //body with bills and defined
+      expect(screen.getByTestId("tbody")).toBeDefined();
+      //body with the four bills
+      expect(screen.getByTestId("tbody")).toHaveTextContent("encore");
+      expect(screen.getByTestId("tbody")).toHaveTextContent("test1");
+      expect(screen.getByTestId("tbody")).toHaveTextContent("test3");
+      expect(screen.getByTestId("tbody")).toHaveTextContent("test2");
     });
   });
 
